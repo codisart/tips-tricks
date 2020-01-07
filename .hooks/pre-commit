@@ -1,0 +1,52 @@
+#!/usr/bin/env sh
+
+# allows yarn to run in a git hook script
+exec < /dev/tty
+
+DECORATOR="============================== "
+echo "${DECORATOR}Run pre-commit checks"
+
+FILES="$(git diff --staged --name-only --no-ext-diff -z --diff-filter=ACMRTUXB HEAD -- | tr '\0' '\n')"
+
+check_blacklist () {
+  error_exit () {
+    echo "There were some blacklisted words"
+    exit 1
+  }
+
+  for file in $FILES ; do
+    # ignore blacklist file and yarn lock
+    if [ "$file" = "$2" ] || [ "$file" = 'front/yarn.lock' ]; then
+      continue
+    fi
+    if echo "$file" | grep -Eq "$1"; then
+      grep -Hnf "$2" "$file" && error_exit
+    fi
+  done
+}
+
+#################
+###   front   ###
+#################
+
+if echo "$FILES" | grep -Eq "^front/"
+then
+  check_blacklist "^front/" "front/.blacklist";
+  cd front;
+  yarn lint || exit 1;
+  cd -;
+fi
+
+################
+###   back   ###
+################
+
+if echo "$FILES" | grep -Eq "^back/"
+then
+  check_blacklist "^back/" "back/.blacklist";
+  cd back;
+  ruby rubocop || exit 1;
+  cd -;
+fi
+
+echo "No error detected during pre-commit script"
