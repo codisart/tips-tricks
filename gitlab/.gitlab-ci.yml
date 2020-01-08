@@ -1,0 +1,26 @@
+ 
+stages:
+  - test
+
+back:test:
+  stage: test
+  image: ruby:2.6.5-stretch
+  services:
+    - name: postgres:latest
+      alias: database        
+    - name: elasticsearch:latest
+      alias: elastic        
+  variables:
+    POSTGRES_DB: postgres_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+  before_script:
+    # Wait for the postgreSQL service to start
+    - while ! pg_isready -h"database"; do echo "Try to connect to PostgreSQL ..."; sleep 1; done; echo "Connection to PostgreSQL succeed"
+    # Wait for the Elastic Search service to start
+    - while [ "$(curl -s http://elastic:9200/_cluster/health | jq ".status" | tr -d '"')" != "green" ]; do echo "Try to connect to ElasticSearch ..."; sleep 1; done; echo "Connection to ElasticSearch succeed"
+  script:
+    - bundle install
+    - bundle exec rails db:migrate RAILS_ENV=test
+    - bundle exec rails test
+  
