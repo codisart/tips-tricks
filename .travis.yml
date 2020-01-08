@@ -4,6 +4,7 @@ php:
   - '7.3'
 
 install:
+  - cd php
   - composer install
 
 script:
