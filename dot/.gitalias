@@ -1,0 +1,11 @@
+[alias]
+  st = status
+  co = checkout
+  ci = commit
+  new-branch = checkout -b
+  del-branch = branch -D 
+  amend = commit --amend
+  tags = tag
+  unstage = !git reset HEAD
+  unstash = stash pop
+  rewrite-commits = "!rwc() { git rebase --interactive HEAD~\"$1\"; }; rwc"
