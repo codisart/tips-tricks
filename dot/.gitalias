@@ -1,11 +1,17 @@
 [alias]
+  git = !git
+  psuh = push
   st = status
   co = checkout
   ci = commit
+  branches = branch -a
   new-branch = checkout -b
   del-branch = branch -D 
   amend = commit --amend
+  staged = diff --staged
   tags = tag
   unstage = !git reset HEAD
   unstash = stash pop
   rewrite-commits = "!rwc() { git rebase --interactive HEAD~\"$1\"; }; rwc"
+  first-push = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
+  forget = "!git fetch -p && git branch -vv | awk '/: disparue]/{print $1}' | xargs git branch -D"
